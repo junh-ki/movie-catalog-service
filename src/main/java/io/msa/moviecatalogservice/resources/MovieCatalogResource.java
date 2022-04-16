@@ -32,17 +32,17 @@ public class MovieCatalogResource {
     @RequestMapping("/{userId}")
     public List<CatalogItem> getCatalog(@PathVariable("userId") String userId) {
         List<Rating> ratings = Arrays.asList(new Rating("1234", 4), new Rating("5678", 3));
-        /*return ratings.stream().map(rating -> Optional.ofNullable(restTemplate.getForObject("http://localhost:8082/movies/"
-                                + rating.getMovieId(), Movie.class))
-                        .map(movie -> new CatalogItem(movie.getName(), "Description", rating.getRating()))
-                        .orElse(null))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());*/
-        return ratings.stream().map(rating -> Optional.ofNullable(webClientBuilder.build().get()
+        /*return ratings.stream().map(rating -> Optional.ofNullable(webClientBuilder.build().get()
                                 .uri("http://localhost:8082/movies/" + rating.getMovieId())
                                 .retrieve()
                                 .bodyToMono(Movie.class)
                                 .block())
+                        .map(movie -> new CatalogItem(movie.getName(), "Description", rating.getRating()))
+                        .orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());*/
+        return ratings.stream().map(rating -> Optional.ofNullable(restTemplate.getForObject("http://localhost:8082/movies/"
+                                + rating.getMovieId(), Movie.class))
                         .map(movie -> new CatalogItem(movie.getName(), "Description", rating.getRating()))
                         .orElse(null))
                 .filter(Objects::nonNull)
