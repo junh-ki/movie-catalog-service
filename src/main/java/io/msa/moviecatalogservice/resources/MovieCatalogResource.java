@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/catalog")
 public class MovieCatalogResource {
 
+    private static final String MOVIE_INFO_SERVICE_URL = "http://movie-info-service/movies/";
+    private static final String RATINGS_DATA_SERVICE_URL = "http://ratings-data-service/ratingsdata/users/";
     private final RestTemplate restTemplate;
     private final WebClient.Builder webClientBuilder;
 
@@ -31,7 +33,7 @@ public class MovieCatalogResource {
     @RequestMapping("/{userId}")
     public List<CatalogItem> getCatalog(@PathVariable("userId") String userId) {
         /*return ratings.stream().map(rating -> Optional.ofNullable(webClientBuilder.build().get()
-                                .uri("http://localhost:8082/movies/" + rating.getMovieId())
+                                .uri(MOVIE_INFO_SERVICE_URL + rating.getMovieId())
                                 .retrieve()
                                 .bodyToMono(Movie.class)
                                 .block())
@@ -39,8 +41,8 @@ public class MovieCatalogResource {
                         .orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());*/
-        return restTemplate.getForObject("http://localhost:8083/ratingsdata/users/" + userId, UserRating.class)
-                .getUserRatings().stream().map(rating -> Optional.ofNullable(restTemplate.getForObject("http://localhost:8082/movies/"
+        return restTemplate.getForObject(RATINGS_DATA_SERVICE_URL + userId, UserRating.class)
+                .getUserRatings().stream().map(rating -> Optional.ofNullable(restTemplate.getForObject(MOVIE_INFO_SERVICE_URL
                                 + rating.getMovieId(), Movie.class))
                         .map(movie -> new CatalogItem(movie.getName(), "Description", rating.getRating()))
                         .orElse(null))
