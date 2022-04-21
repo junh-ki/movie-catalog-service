@@ -44,7 +44,7 @@ public class MovieCatalogResource {
         return restTemplate.getForObject(RATINGS_DATA_SERVICE_URL + userId, UserRating.class)
                 .getUserRatings().stream().map(rating -> Optional.ofNullable(restTemplate.getForObject(MOVIE_INFO_SERVICE_URL
                                 + rating.getMovieId(), Movie.class))
-                        .map(movie -> new CatalogItem(movie.getName(), "Description", rating.getRating()))
+                        .map(movie -> new CatalogItem(movie.getName(), movie.getDesc(), rating.getRating()))
                         .orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
