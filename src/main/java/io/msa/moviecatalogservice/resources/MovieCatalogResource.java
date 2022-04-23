@@ -1,5 +1,6 @@
 package io.msa.moviecatalogservice.resources;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.msa.moviecatalogservice.models.CatalogItem;
 import io.msa.moviecatalogservice.models.Movie;
 import io.msa.moviecatalogservice.models.UserRating;
@@ -31,6 +32,7 @@ public class MovieCatalogResource {
     }
 
     @RequestMapping("/{userId}")
+    @HystrixCommand(fallbackMethod = "getFallbackCatalog")
     public List<CatalogItem> getCatalog(@PathVariable("userId") String userId) {
         /*return ratings.stream().map(rating -> Optional.ofNullable(webClientBuilder.build().get()
                                 .uri(MOVIE_INFO_SERVICE_URL + rating.getMovieId())
@@ -41,13 +43,17 @@ public class MovieCatalogResource {
                         .orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());*/
-        return restTemplate.getForObject(RATINGS_DATA_SERVICE_URL + userId, UserRating.class)
+        return Objects.requireNonNull(restTemplate.getForObject(RATINGS_DATA_SERVICE_URL + userId, UserRating.class))
                 .getUserRatings().stream().map(rating -> Optional.ofNullable(restTemplate.getForObject(MOVIE_INFO_SERVICE_URL
                                 + rating.getMovieId(), Movie.class))
                         .map(movie -> new CatalogItem(movie.getName(), movie.getDesc(), rating.getRating()))
                         .orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    public List<CatalogItem> getFallbackCatalog(@PathVariable("userId") String userId) {
+        return List.of(new CatalogItem("No movie", "", 0));
     }
 
 }
